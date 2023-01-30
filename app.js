@@ -6,7 +6,9 @@ const _ = require("lodash");
 require("dotenv").config();
 
 mongoose
-  .connect(process.env.MONGODB, { useNewUrlParser: true })
+  .connect(process.env.MONGODB, {
+    useNewUrlParser: true,
+  })
   .then(() => {
     console.log("Connected to the database ");
   })
@@ -119,20 +121,28 @@ const job1 = new Job({
 
 app.get("/", (req, res) => {
   res.setHeader("Content-Type", "application/json");
-  res.end(JSON.stringify({ message: "Hello" }));
+  res.end(JSON.stringify({ message: "Hello Welcome" }));
 });
 
 app.get("/posts", async (req, res) => {
-  // console.log(res);
   const post = await Post.find();
   res.setHeader("Content-Type", "application/json");
   res.end(JSON.stringify(post));
 });
 
 app.get("/job", async (req, res) => {
-  const comment = await Job.find();
+  const job = await Job.find();
   res.setHeader("Content-Type", "application/json");
-  res.end(JSON.stringify(comment));
+  res.end(JSON.stringify(job));
+});
+
+app.get("/comment", async (req, res) => {
+  Comment.find({ postId: req.query.post_id }, (err, result) => {
+    if (!err) {
+      res.setHeader("Content-Type", "application/json");
+      res.end(JSON.stringify(result));
+    }
+  });
 });
 
 app.get("/login", (req, res) => {
@@ -193,6 +203,15 @@ app.get("/user_id", async (req, res) => {
   );
 });
 
+app.get("/comment_count", (req, res) => {
+  Comment.countDocuments({ postId: req.query.post_id }, (err, result) => {
+    if (!err) {
+      res.setHeader("Content-Type", "application/json");
+      res.end(JSON.stringify(result));
+    }
+  });
+});
+
 // post routes
 
 app.post("/posts", async (req, res) => {
@@ -241,6 +260,15 @@ app.post("/register", async (req, res) => {
       }
     }
   });
+});
+
+app.post("/comment", async (req, res) => {
+  const newcomment = new Comment({
+    userId: req.body.user_id,
+    postId: req.body.post_id,
+    content: req.body.content,
+  });
+  newcomment.save();
 });
 
 // delete routes
