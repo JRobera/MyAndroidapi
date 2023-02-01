@@ -271,6 +271,20 @@ app.post("/comment", async (req, res) => {
   newcomment.save();
 });
 
+app.post("/update-profile/:id", (req, res) => {
+  User.findOneAndUpdate(
+    { _id: req.params.id },
+    {
+      $set: {
+        user_name: req.body.user_name,
+        email: req.body.user_email,
+        password: req.body.newpassword,
+      },
+    },
+    (err) => {}
+  );
+});
+
 // delete routes
 
 app.delete("/delete/:id", (req, res) => {
