@@ -34,14 +34,16 @@ const userSchema = new mongoose.Schema({
       ref: "Post",
     },
   ],
+  likes: [{ postid: { type: mongoose.Schema.Types.ObjectId, ref: "Post" } }],
 });
 const User = mongoose.model("user", userSchema);
 const user1 = new User({
-  user_name: "Robera",
+  user_name: "test",
   user_image: 2345,
-  email: "robera@gmail.com",
-  password: "123abc",
-  posts: [ObjectID("63ccfbbe7e28f61ffe1f660d")],
+  email: "test@gmail.com",
+  password: "123",
+  posts: [], //ObjectID("63ccfbbe7e28f61ffe1f660d")
+  likes: [ObjectID("63d7d0ca7ed42dcce7970c62")],
 });
 // user1.save();
 
@@ -184,12 +186,6 @@ app.get("/search-job", (req, res) => {
   );
 });
 
-// app.get("/profile", async (req, res) => {
-//   const user = await User.find();
-//   res.setHeader("Content-Type", "application/json");
-//   res.end(JSON.stringify(user));
-// });
-
 app.get("/user_id", async (req, res) => {
   User.find(
     { _id: req.query.id },
@@ -229,7 +225,23 @@ app.post("/like", (req, res) => {
     { $set: { likes: req.body.likes } },
     (err) => {}
   );
-  res.redirect("/posts");
+});
+
+app.post("/liked", (req, res) => {
+  User.findOneAndUpdate(
+    { email: req.body.user_email },
+    { $push: { likes: { postid: req.body.id } } },
+    (err) => {}
+  );
+});
+
+app.post("/update-liked", (req, res) => {
+  User.updateOne(
+    { _id: req.body.user_id },
+    { $pull: { likes: { postid: req.body.id } } },
+    { multi: true },
+    (err) => {}
+  );
 });
 
 app.post("/job-post", (req, res) => {
